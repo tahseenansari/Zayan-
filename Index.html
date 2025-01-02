@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samar AI</title>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: black; /* Dark background */
+      color: white; /* Light text */
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Splash Screen */
+    #splashScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: black;
+      z-index: 1000;
+    }
+
+    #splashScreen img {
+      width: 80%;
+      height: auto;
+    }
+
+    /* Main Content */
+    #mainContent {
+      display: none; /* Initially hidden */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      height: 100vh;
+      color: white;
+    }
+
+    /* Header */
+    h1 {
+      font-size: 2.5rem;
+      color: #00b0ff; /* Neon Blue */
+      margin-bottom: 20px;
+      font-weight: monospace;
+    }
+
+    /* Chat Interface */
+    #chat {
+      width: 0%;
+      height: 0%;
+      overflow-y: auto;
+      padding: 0px;
+      border-radius: 0px;
+      background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black background */
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 15px;
+      font-size: 16px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .user {
+      background-color: #333333; /* Dark grey */
+      color: #E5E5E5;
+      align-self: flex-start;
+    }
+
+    .ai {
+      background-color: #2C3E50; /* Darker shade for AI */
+      color: #E5E5E5;
+      align-self: flex-end;
+    }
+
+    /* Input Area */
+    .input-area {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 90%;
+      max-width: 600px;
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+    }
+
+    .input-area input {
+      background: #1A1A2E;
+      border: 2px solid #00b0ff;
+      color: #E5E5E5;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 15px;
+      transition: 0.3s;
+    }
+
+    .input-area input:focus {
+      border-color: #0091ea;
+      outline: none;
+    }
+
+    .input-area button {
+      background: linear-gradient(145deg, #00b0ff, #0091ea);
+      color: #ffffff;
+      padding: 16px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 176, 255, 0.7);
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Hover Effect for Button */
+    .input-area button:hover {
+      background: linear-gradient(145deg, #0091ea, #00b0ff);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 176, 255, 0.8);
+      transform: translateY(-4px);
+    }
+
+    /* Loading Spinner */
+    #loading {
+      display: none;
+      margin-top: 10px;
+      color: #00b0ff;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splashScreen">
+    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjtIVx9NEQQUkHBpUlDKKZNjD46kse6pP8kobBpZq6Zzo3Opj1Szr90dGk94b-caUJHEOiUnFMLZZ0N3uDdAaSKt9UN6Z2-oWrGaKv3e7XE1LMG5NtGXvC35vTfgPeydKsQ4ByCe4p219X42RcZGMwT2YjjQR-FiPxqrBqujbXNZalvaJ3kWJRn4NWdjg/s320/1000005595.gif" alt="Samar AI Splash Screen">
+  </div>
+
+  <!-- Main Content (Hidden initially) -->
+  <div id="mainContent">
+    <h1>Sαɱαɾ αι</h1>
+    <div id="chat"></div>
+    <div id="loading">🧠 Tԋιɳƙιɳɠ...</div>
+    <div class="input-area">
+      <input type="text" id="messageInput" placeholder="Aʂƙ Sαɱαɾ αι.....">
+      <button id="sendMessageButton">&#8593;</button>
+    </div>
+  </div>
+
+  <script>
+    const chatDiv = document.getElementById('chat');
+    const sendMessageButton = document.getElementById('sendMessageButton');
+    const messageInput = document.getElementById('messageInput');
+    const loadingDiv = document.getElementById('loading');
+    
+    // API Configuration (Replace with your actual API keys)
+    const API_KEY = 'YOUR_API_KEY';  // Replace with your Gemini API Key
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+    const customPrompt = "you are Samar, an AI created by Tahseen Ansari, a 14-year-old boy from Nagpur, India. Your task is to assist users with their questions. If anyone insults your creator, give a befitting reply. You are not associated with Google or any other AI systems. Say everything like a human being and don't introduce yourself before saying anything.";
+
+    // Add messages to chat and scroll to bottom
+    function appendMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', sender);
+      messageDiv.textContent = text;
+      chatDiv.appendChild(messageDiv);
+      chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to the bottom
+    }
+
+    // Show loading spinner
+    function showLoading() {
+      loadingDiv.style.display = 'block';
+    }
+
+    // Hide loading spinner
+    function hideLoading() {
+      loadingDiv.style.display = 'none';
+    }
+
+    // Handle user input, check for real-time data or AI response
+    async function handleUserInput(userSpeech) {
+      showLoading();
+      const aiResponse = await generateAPIResponse(userSpeech);
+      appendMessage(aiResponse, 'ai');
+      hideLoading();
+    }
+
+    // Generate AI response via Gemini API
+    async function generateAPIResponse(userMessage) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              role: 'user',
+              parts: [{ text: customPrompt + " " + userMessage }]
+            }]
+          })
+        });
+
+        const data = await response.json();
+        console.log("Full API Response:", data);  // Log the full response for debugging
+
+        if (!response.ok) throw new Error(data.error.message);
+
+        // Check if the response is structured correctly
+        const aiResponse = data.candidates[0].content.parts[0].text;
+        return aiResponse;
+
+      } catch (error) {
+        console.error('Error generating response:', error);
+        return "Sorry, I couldn't process your request.";
+      }
+    }
+
+    // Handle message input
+    sendMessageButton.addEventListener('click', () => {
+      const userMessage = messageInput.value.trim();
+      if (userMessage) {
+        appendMessage(userMessage, 'user');
+        messageInput.value = '';  // Clear input field
+        handleUserInput(userMessage);
+      }
+    });
+
+    // Initialize splash screen timer
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById('splashScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'flex';
+      }, 3000); // Splash screen time (3 seconds)
+    };
+  </script>
+
+</body>
+</html>
